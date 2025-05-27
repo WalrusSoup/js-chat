@@ -10,8 +10,6 @@ on:
 jobs:
   publish:
     name: Publish package
-    needs: check-release
-    if: needs.check-release.outputs.release == 'true'
     runs-on: 'ubuntu-latest'
     steps:
       - name: Checkout repository

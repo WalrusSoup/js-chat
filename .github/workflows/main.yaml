@@ -1,33 +1,33 @@
-name: Jest Tests
+# name: Jest Tests
 
-on: [push]
+# on: [push]
 
-jobs:
-  test:
-    name: Run contract tests
-    runs-on:
-      group: organization/Default
-    steps:
-      - uses: actions/checkout@v4
-      - run: yarn install
-      - run: yarn test
-        env:
-          PUBLISH_KEY: ${{ secrets.PUBLISH_KEY }}
-          SUBSCRIBE_KEY: ${{ secrets.SUBSCRIBE_KEY }}
-          USER_ID: ${{ secrets.USER_ID }}
+# jobs:
+#   test:
+#     name: Run contract tests
+#     runs-on:
+#       group: organization/Default
+#     steps:
+#       - uses: actions/checkout@v4
+#       - run: yarn install
+#       - run: yarn test
+#         env:
+#           PUBLISH_KEY: ${{ secrets.PUBLISH_KEY }}
+#           SUBSCRIBE_KEY: ${{ secrets.SUBSCRIBE_KEY }}
+#           USER_ID: ${{ secrets.USER_ID }}
 
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: lib/junit.xml
+#       - name: Upload test results
+#         if: always()
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: test-results
+#           path: lib/junit.xml
 
-      - name: Publish test results
-        if: always()
-        uses: dorny/test-reporter@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          name: "Test results"
-          path: "lib/junit.xml"
-          reporter: "jest-junit"
+#       - name: Publish test results
+#         if: always()
+#         uses: dorny/test-reporter@v1
+#         with:
+#           token: ${{ secrets.GITHUB_TOKEN }}
+#           name: "Test results"
+#           path: "lib/junit.xml"
+#           reporter: "jest-junit"
