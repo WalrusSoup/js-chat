@@ -20,6 +20,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Publish to NPM
         run: |
+          yarn i
           yarn build
           cd lib
           npm publish --access public
