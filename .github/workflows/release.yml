@@ -24,5 +24,6 @@ jobs:
           yarn build
           cd lib
           npm publish --access public
+          echo "OK"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
