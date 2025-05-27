@@ -3667,27 +3667,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pubnub/chat@npm:*, @pubnub/chat@workspace:lib":
-  version: 0.0.0-use.local
-  resolution: "@pubnub/chat@workspace:lib"
+"@pubnub/chat@npm:*":
+  version: 0.12.0
+  resolution: "@pubnub/chat@npm:0.12.0"
   dependencies:
-    "@babel/core": "npm:7.22.15"
-    "@babel/preset-env": "npm:7.22.5"
-    "@babel/preset-typescript": "npm:7.22.5"
-    "@rollup/plugin-replace": "npm:^5.0.2"
-    "@rollup/plugin-terser": "npm:^0.4.3"
-    "@types/jest": "npm:29.5.0"
-    "@types/pubnub": "npm:7.4.2"
-    babel-jest: "npm:29.5.0"
-    dotenv: "npm:16.0.3"
-    jest: "npm:29.5.0"
-    jest-junit: "npm:16.0.0"
-    pubnub: "npm:8.2.7"
-    rollup: "npm:^3.29.2"
-    rollup-plugin-ts: "npm:^3.4.5"
-    typescript: "npm:4.9.5"
-  languageName: unknown
-  linkType: soft
+    format-util: "npm:^1.0.5"
+    pubnub: "npm:8.6.0"
+  checksum: 10c0/31e1407b394f566550ce633e6a2172e8f029ccbffc021c89ba8e4b077051b7e8e864d724551f2fc597eeda3f8544c353503396e269eea6873c4b84b3462024d4
+  languageName: node
+  linkType: hard
 
 "@react-native-community/cli-clean@npm:13.6.9":
   version: 13.6.9
@@ -5520,6 +5508,28 @@ __metadata:
   checksum: 10c0/3cf2e044fb4c95dd7b0b3092dcc6c77d6f459ddfae6b1f8ea4ee1d57b33c158072ae9f1067eb1737b6706bad644457f261c70af196f676477fdf3a3ad5653da8
   languageName: node
   linkType: hard
+
+"@walrussoup/pubnub-chat@workspace:lib":
+  version: 0.0.0-use.local
+  resolution: "@walrussoup/pubnub-chat@workspace:lib"
+  dependencies:
+    "@babel/core": "npm:7.22.15"
+    "@babel/preset-env": "npm:7.22.5"
+    "@babel/preset-typescript": "npm:7.22.5"
+    "@rollup/plugin-replace": "npm:^5.0.2"
+    "@rollup/plugin-terser": "npm:^0.4.3"
+    "@types/jest": "npm:29.5.0"
+    "@types/pubnub": "npm:7.4.2"
+    babel-jest: "npm:29.5.0"
+    dotenv: "npm:16.0.3"
+    jest: "npm:29.5.0"
+    jest-junit: "npm:16.0.0"
+    pubnub: "npm:8.2.7"
+    rollup: "npm:^3.29.2"
+    rollup-plugin-ts: "npm:^3.4.5"
+    typescript: "npm:4.9.5"
+  languageName: unknown
+  linkType: soft
 
 "@webassemblyjs/ast@npm:1.12.1, @webassemblyjs/ast@npm:^1.12.1":
   version: 1.12.1
@@ -9912,6 +9922,13 @@ __metadata:
     combined-stream: "npm:^1.0.8"
     mime-types: "npm:^2.1.12"
   checksum: 10c0/bb102d570be8592c23f4ea72d7df9daa50c7792eb0cf1c5d7e506c1706e7426a4e4ae48a35b109e91c85f1c0ec63774a21ae252b66f4eb981cb8efef7d0463c8
+  languageName: node
+  linkType: hard
+
+"format-util@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "format-util@npm:1.0.5"
+  checksum: 10c0/89b9d73799bb51fba141029bbc358d6c5e591863156a806d0eece4718e9c8c7daacf3b0581ddde481e5183dd530072fc2cca8630434122b328bc3110d16ab38e
   languageName: node
   linkType: hard
 
@@ -15256,6 +15273,24 @@ __metadata:
     react-native-url-polyfill: "npm:^2.0.0"
     text-encoding: "npm:^0.7.0"
   checksum: 10c0/fbb97fa44c008bfa4770a69f4bb196f2be39b1a18dc86d2d28bacdaa578c445b9be807d777242db578d81f0702c3f276bffbb3ac21c3faa1e14059be022416f1
+  languageName: node
+  linkType: hard
+
+"pubnub@npm:8.6.0":
+  version: 8.6.0
+  resolution: "pubnub@npm:8.6.0"
+  dependencies:
+    agentkeepalive: "npm:^3.5.2"
+    buffer: "npm:^6.0.3"
+    cbor-js: "npm:^0.1.0"
+    cbor-sync: "npm:^1.0.4"
+    form-data: "npm:^4.0.0"
+    lil-uuid: "npm:^0.1.1"
+    node-fetch: "npm:^2.7.0"
+    proxy-agent: "npm:^6.3.0"
+    react-native-url-polyfill: "npm:^2.0.0"
+    text-encoding: "npm:^0.7.0"
+  checksum: 10c0/7cc89f31e21d9e42d5b2ab36dd4ed2a0f8f86f4d3faad25f2176068075543fe361474299a88cedc2d41bac1df2270d0a7df4c08b315f20925f84a7bd9dca5025
   languageName: node
   linkType: hard
 
