@@ -70,6 +70,8 @@ export class Chat {
   private suggestedChannelsCache: Map<string, Channel[]>
   /* @internal */
   private subscriptions: { [channel: string]: Set<string> }
+  /* @internal */
+  private channelGroups: Set<string> = new Set()
   /** @internal */
   errorLogger: ErrorLogger
   /** @internal */
@@ -635,6 +637,78 @@ export class Chat {
         await this.sdk.objects.removeChannelMetadata({ channel: id })
         return true
       }
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Channel groups
+   */
+  async joinManyChannelsAsGroup(ids: string[], callback: (message: Message) => void) {
+    if (!ids || !ids.length) throw "IDs are required"
+
+    const userId = this.user.id
+    const chunkSize = 200
+
+    const chunked = (array: string[], size: number): string[][] =>
+      Array.from({ length: Math.ceil(array.length / size) }, (_, i) =>
+        array.slice(i * size, i * size + size)
+      )
+
+    const chunks = chunked(ids, chunkSize)
+    const channelGroupsToJoin = chunks.map((chunk, index) => `mti-cg-${userId}-${index}`)
+    const channelNameToGroupMap = new Map<string, number>()
+
+    for (let i = 0; i < chunks.length; i++) {
+      const groupName = `mti-cg-${userId}-${i}`
+      await this.sdk.channelGroups.deleteGroup({
+        channelGroup: groupName,
+      })
+      await this.sdk.channelGroups.addChannels({
+        channels: chunks[i],
+        channelGroup: groupName,
+      })
+      channelNameToGroupMap.set(groupName, i)
+    }
+
+    this.sdk.subscribe({
+      channelGroups: channelGroupsToJoin,
+    })
+
+    this.channelGroups = new Set<string>(channelGroupsToJoin)
+
+    this.sdk.addListener({
+      message: async (msgEvent) => {
+        const { channel } = msgEvent
+        if (!this.subscriptions[channel]) {
+          const pendingChannel = await this.getChannel(channel)
+          if (!pendingChannel) {
+            return
+          }
+          await pendingChannel.join(callback)
+        }
+        channelNameToGroupMap.forEach((groupIndex, groupName) => {
+          if (groupName === channel) {
+            this.sdk.channelGroups.removeChannels({
+              channels: [channel],
+              channelGroup: `mti-cg-${userId}-${groupIndex}`,
+            })
+          }
+        })
+      },
+    })
+  }
+
+  getChannelGroups(): string[] {
+    return Array.from(this.channelGroups)
+  }
+
+  async getChannelsInGroup(channelGroup: string) {
+    if (!channelGroup || !channelGroup.length) throw "Channel group is required"
+    try {
+      const { channels } = await this.sdk.channelGroups.listChannels({ channelGroup })
+      return channels
     } catch (error) {
       throw error
     }

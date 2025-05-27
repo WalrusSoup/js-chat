@@ -1221,4 +1221,47 @@ describe("Channel test", () => {
     expect(updatedMembership?.eTag).toBeDefined()
     removeListener()
   })
+
+  test("should be able to join many channels at once via a channel group", async () => {
+    const randomChannels = [createRandomChannel(), createRandomChannel(), createRandomChannel()]
+    const channels = await Promise.all(randomChannels)
+    const channelsToJoin = channels.map((channel) => channel.id)
+    console.log("channels created, joining a single group", channelsToJoin)
+    await chat.joinManyChannelsAsGroup(channelsToJoin, () => null)
+    // verify with the sdk we joined the channel group
+    const groups = await chat.getChannelGroups()
+    expect(groups).toBeDefined()
+    expect(groups.length).toBe(1)
+    // expect the first channel group to have 3 channels
+    const channelsInGroup = await chat.getChannelsInGroup(groups[0])
+    expect(channelsInGroup).toBeDefined()
+    expect(channelsInGroup.length).toBe(3)
+  })
+
+  test("should join channels when new messages are received into the channel group", async () => {
+    const sharedChannelId = `shared-channel-${Date.now()}`
+    const otherChatInstance = await createChatInstance({
+      userId: "test-user-2",
+      shouldCreateNewInstance: true,
+    })
+
+    const pendingChannel = await otherChatInstance.createDirectConversation({
+      user: chat.currentUser,
+      channelData: { name: "Test Shared Conversation" },
+      channelId: sharedChannelId,
+    })
+
+    const randomChannels = [createRandomChannel()]
+    const channels = await Promise.all(randomChannels)
+    const channelsToJoin = channels.map((channel) => channel.id)
+    channelsToJoin.push(sharedChannelId)
+
+    await chat.joinManyChannelsAsGroup(channelsToJoin, () => null)
+    expect(chat.sdk.getSubscribedChannels().includes(sharedChannelId)).toBe(false)
+
+    await pendingChannel.channel.sendText("Hello from user 2")
+    await sleep(2000)
+
+    expect(chat.sdk.getSubscribedChannels().includes(sharedChannelId)).toBe(true)
+  })
 })
