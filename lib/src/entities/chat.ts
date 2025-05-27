@@ -678,8 +678,8 @@ export class Chat {
 
     this.channelGroups = new Set<string>(channelGroupsToJoin)
 
-    this.sdk.addListener({
-      message: async (msgEvent) => {
+    const channelGroupMessageListener = {
+      message: async (msgEvent: any) => {
         const { channel } = msgEvent
         if (!this.subscriptions[channel]) {
           const pendingChannel = await this.getChannel(channel)
@@ -697,7 +697,13 @@ export class Chat {
           }
         })
       },
-    })
+    }
+
+    this.sdk.addListener(channelGroupMessageListener)
+
+    return () => {
+      this.sdk.removeListener(channelGroupMessageListener)
+    }
   }
 
   getChannelGroups(): string[] {
