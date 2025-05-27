@@ -680,21 +680,19 @@ export class Chat {
 
     const channelGroupMessageListener = {
       message: async (msgEvent: any) => {
-        const { channel } = msgEvent
-        if (!this.subscriptions[channel]) {
-          const pendingChannel = await this.getChannel(channel)
-          if (!pendingChannel) {
-            return
-          }
-          await pendingChannel.join(callback)
+        const subscribedChannel = msgEvent.subscribedChannel
+        const realChannel = msgEvent.channel
+        if (!subscribedChannel.includes("cg-")) {
+          return
         }
-        channelNameToGroupMap.forEach((groupIndex, groupName) => {
-          if (groupName === channel) {
-            this.sdk.channelGroups.removeChannels({
-              channels: [channel],
-              channelGroup: `mti-cg-${userId}-${groupIndex}`,
-            })
-          }
+        const pendingChannel = await this.getChannel(realChannel)
+        if (!pendingChannel) {
+          return
+        }
+        await pendingChannel.join(callback)
+        this.sdk.channelGroups.removeChannels({
+          channels: [realChannel],
+          channelGroup: subscribedChannel,
         })
       },
     }
