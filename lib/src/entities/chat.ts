@@ -643,22 +643,62 @@ export class Chat {
   }
 
   /**
+   * Chunk a list of channel IDs into groups based on URL length constraints.
+   *
+   * @param channels - The list of channel IDs to group.
+   * @param maxUrlLength - Maximum URL length to stay under (default: 1800).
+   * @param groupNamePrefix - Prefix used for channel group names.
+   * @returns An object containing the chunks and a map from channel ID to group index.
+   */
+  chunkChannelsByUrlLength(
+    channels: string[],
+    groupNamePrefix: string
+  ): { chunks: string[][]; channelNameToGroupMap: Map<string, number> } {
+    const maxUrlLength = 1800
+    const baseLength = groupNamePrefix.length + 20
+    const chunks: string[][] = []
+    const channelNameToGroupMap = new Map<string, number>()
+
+    let currentChunk: string[] = []
+    let currentLength = baseLength
+
+    for (const channel of channels) {
+      const extraLength = channel.length + (currentChunk.length > 0 ? 1 : 0)
+
+      if (currentLength + extraLength <= maxUrlLength) {
+        currentChunk.push(channel)
+        currentLength += extraLength
+      } else {
+        chunks.push(currentChunk)
+        const groupIndex = chunks.length - 1
+        currentChunk.forEach((id) => channelNameToGroupMap.set(id, groupIndex))
+
+        currentChunk = [channel]
+        currentLength = baseLength + channel.length
+      }
+    }
+
+    if (currentChunk.length > 0) {
+      chunks.push(currentChunk)
+      const groupIndex = chunks.length - 1
+      currentChunk.forEach((id) => channelNameToGroupMap.set(id, groupIndex))
+    }
+
+    return { chunks, channelNameToGroupMap }
+  }
+
+  /**
    * Channel groups
    */
   async joinManyChannelsAsGroup(ids: string[], callback: (message: Message) => void) {
     if (!ids || !ids.length) throw "IDs are required"
-
     const userId = this.user.id
-    const chunkSize = 200
 
-    const chunked = (array: string[], size: number): string[][] =>
-      Array.from({ length: Math.ceil(array.length / size) }, (_, i) =>
-        array.slice(i * size, i * size + size)
-      )
-
-    const chunks = chunked(ids, chunkSize)
+    const { chunks, channelNameToGroupMap } = this.chunkChannelsByUrlLength(
+      ids,
+      `mti-cg-${userId}-`
+    )
     const channelGroupsToJoin = chunks.map((chunk, index) => `mti-cg-${userId}-${index}`)
-    const channelNameToGroupMap = new Map<string, number>()
 
     for (let i = 0; i < chunks.length; i++) {
       const groupName = `mti-cg-${userId}-${i}`
@@ -713,6 +753,20 @@ export class Chat {
     try {
       const { channels } = await this.sdk.channelGroups.listChannels({ channelGroup })
       return channels
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async removeChannelFromGroup(id: string, channelGroup: string) {
+    if (!id || !id.length) throw "ID is required"
+    if (!channelGroup || !channelGroup.length) throw "Channel group is required"
+    try {
+      await this.sdk.channelGroups.removeChannels({
+        channels: [id],
+        channelGroup,
+      })
+      return true
     } catch (error) {
       throw error
     }

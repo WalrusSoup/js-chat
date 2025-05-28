@@ -1264,4 +1264,28 @@ describe("Channel test", () => {
 
     expect(chat.sdk.getSubscribedChannels().includes(sharedChannelId)).toBe(true)
   })
+
+  test("should chunk channels by URL-safe length, not count", () => {
+    // Create channel IDs that are exactly 500 characters long
+    const createLongChannelId = (index: number) => `channel-${index}-` + "x".repeat(488) // "channel-0-" is 11 chars, so + 489 = 500
+
+    const channels = Array.from({ length: 5 }, (_, i) => createLongChannelId(i)) // 5 very long channels
+    const groupPrefix = "test-cg-"
+
+    // Set max URL length artificially low to force chunking
+    const { chunks, channelNameToGroupMap } = chat.chunkChannelsByUrlLength(channels, groupPrefix)
+
+    // Each channel is 500 chars; only 1–2 can fit per chunk => must be >1 chunk
+    expect(chunks.length).toBeGreaterThan(1)
+
+    // Ensure all channels are accounted for
+    expect(channelNameToGroupMap.size).toBe(channels.length)
+
+    // Ensure each channel is mapped to the correct group index
+    chunks.forEach((chunk, index) => {
+      for (const id of chunk) {
+        expect(channelNameToGroupMap.get(id)).toBe(index)
+      }
+    })
+  })
 })

@@ -433,6 +433,12 @@ export class Channel {
 
       this.disconnect = this.connect(callback)
 
+      this.chat.getChannelGroups().forEach(async (group) => {
+        if ((await this.chat.getChannelsInGroup(group)).includes(this.id)) {
+          this.chat.removeChannelFromGroup(this.id, group)
+        }
+      })
+
       return {
         membership: await Membership.fromMembershipDTO(
           this.chat,
