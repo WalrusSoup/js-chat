@@ -741,6 +741,7 @@ export class Chat {
         if (callbackOnJoin) {
           callbackOnJoin(msgEvent)
         }
+        callback(Message.fromDTO(this, msgEvent))
       },
     }
 
