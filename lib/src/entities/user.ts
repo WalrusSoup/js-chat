@@ -1,6 +1,6 @@
 import PubNub, { UUIDMetadataObject, ObjectCustom, GetMembershipsParametersv2 } from "pubnub"
 import { Chat } from "./chat"
-import { DeleteParameters, OptionalAllBut } from "../types"
+import { DeleteParameters, MembershipResponse, OptionalAllBut } from "../types"
 import { Channel } from "./channel"
 import { Membership } from "./membership"
 import {
@@ -160,6 +160,34 @@ export class User {
       memberships: membershipsResponse.data.map((m) =>
         Membership.fromMembershipDTO(this.chat, m, this)
       ),
+    }
+  }
+
+  async getAllMemberships(
+    params: Omit<GetMembershipsParametersv2, "include" | "uuid"> = {}
+  ): Promise<{
+    total: number
+    memberships: Membership[]
+  }> {
+    let allMemberships: any[] = []
+    let page = undefined
+    let hasNext = true
+    let total = 0
+
+    while (hasNext) {
+      const response = (await this.getMemberships({ ...params, page })) as MembershipResponse
+      allMemberships = allMemberships.concat(response.memberships)
+      total = response.total ?? 0
+      if (response.page.next) {
+        page = { next: response.page.next }
+      } else {
+        hasNext = false
+      }
+    }
+
+    return {
+      total,
+      memberships: allMemberships,
     }
   }
 

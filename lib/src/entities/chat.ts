@@ -1181,6 +1181,36 @@ export class Chat {
     }
   }
 
+  async getUnreadMessageCountsForChannels(
+    channelIds: string[]
+  ): Promise<{ channel_id: string; count: number }[]> {
+    if (!channelIds.length) {
+      return []
+    }
+    const response = await this.sdk.messageCounts({
+      channels: channelIds,
+      channelTimetokens: channelIds.map(() => "0") as string[],
+    })
+
+    return Object.keys(response.channels)
+      .map((key) => {
+        return {
+          channel_id: key,
+          count: response.channels[key],
+        }
+      })
+      .filter((r) => r.count > 0)
+  }
+
+  async getUnreadMessageCountForChannel(channelId: string): Promise<number> {
+    const response = await this.getUnreadMessageCountsForChannels([channelId])
+    const channelCount = response.find((r) => r.channel_id === channelId)
+    if (!channelCount) {
+      return 0
+    }
+    return channelCount.count
+  }
+
   async getUnreadMessagesCounts(params: Omit<GetMembershipsParametersv2, "include"> = {}) {
     const userMemberships = await this.currentUser.getMemberships(params)
 
