@@ -172,6 +172,7 @@ export class User {
     let allMemberships: any[] = []
     let page = undefined
     let hasNext = true
+    let previousPage = null
     let total = 0
 
     while (hasNext) {
@@ -183,6 +184,11 @@ export class User {
       } else {
         hasNext = false
       }
+      if (previousPage === response.page.next) {
+        hasNext = false
+        break
+      }
+      previousPage = response.page.next
     }
 
     return {

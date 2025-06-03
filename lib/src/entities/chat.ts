@@ -1187,9 +1187,24 @@ export class Chat {
     if (!channelIds.length) {
       return []
     }
+    const relevantTimetokens = [] as string[]
+    const membershipResponse = await this.user.getAllMemberships()
+    const relevantMemberships = membershipResponse.memberships.filter((m) =>
+      channelIds.includes(m.channel.id)
+    )
+
+    channelIds.forEach((channelId) => {
+      const relevantMembership = relevantMemberships.find((m) => m.channel.id === channelId)
+      if (relevantMembership && relevantMembership.lastReadMessageTimetoken) {
+        relevantTimetokens.push(`${relevantMembership.lastReadMessageTimetoken}` || "0")
+      } else {
+        relevantTimetokens.push("0")
+      }
+    })
+
     const response = await this.sdk.messageCounts({
       channels: channelIds,
-      channelTimetokens: channelIds.map(() => "0") as string[],
+      channelTimetokens: relevantTimetokens as string[],
     })
 
     return Object.keys(response.channels)
