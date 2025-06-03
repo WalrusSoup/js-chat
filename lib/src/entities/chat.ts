@@ -690,7 +690,11 @@ export class Chat {
   /**
    * Channel groups
    */
-  async joinManyChannelsAsGroup(ids: string[], callback: (message: Message) => void) {
+  async joinManyChannelsAsGroup(
+    ids: string[],
+    callback: (message: Message) => void,
+    callbackOnJoin?: (event: any) => void
+  ) {
     if (!ids || !ids.length) throw "IDs are required"
     const userId = this.user.id
 
@@ -734,6 +738,9 @@ export class Chat {
           channels: [realChannel],
           channelGroup: subscribedChannel,
         })
+        if (callbackOnJoin) {
+          callbackOnJoin(msgEvent)
+        }
       },
     }
 
