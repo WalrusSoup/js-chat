@@ -1,9 +1,6 @@
-!!!!!!!!!!
-
-PubNub JavaScript Chat SDK development has moved to the [PubNub Kotlin Multiplatform Chat SDK repository](https://github.com/pubnub/kmp-chat).
-This repository is no longer being updated.
-
-!!!!!!!!!!
+> [!IMPORTANT]  
+> Pubnub moved their Javascript Chat SDK to Kotlin and, to be honest, I am not sure how that works at all. But I do know that my bugs left unfixed for several months,
+> so I just decided to start fixing it myself.
 
 # PubNub JavaScript Chat SDK
 

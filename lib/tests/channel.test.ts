@@ -1288,4 +1288,39 @@ describe("Channel test", () => {
       }
     })
   })
+
+  test("it should update lastReadTimetoken timestamps on message send if configured", async () => {
+    const user1 = await createRandomUser()
+    const user2 = await createRandomUser()
+    const chatInstanceWithReadConfig = await createChatInstance({
+      userId: user1.id,
+      shouldCreateNewInstance: true,
+      config: {
+        userId: user1.id,
+        publishKey: process.env.PUBLISH_KEY ?? "",
+        subscribeKey: process.env.SUBSCRIBE_KEY ?? "",
+        updateTimestampOnSend: true,
+      },
+    })
+
+    const directConversation = await chatInstanceWithReadConfig.createDirectConversation({
+      user: user2,
+      channelData: { name: "Test Convo" },
+    })
+
+    await directConversation.channel.join(() => null)
+    const initialLastReadMessageTimetoken =
+      await chatInstanceWithReadConfig.currentUser.getMembership(directConversation.channel.id)
+
+    const messageText = "Hello from User1 in read config chat"
+    await directConversation.channel.sendText(messageText)
+    await sleep(500)
+
+    const updatedLastReadMessageTimetoken =
+      await chatInstanceWithReadConfig.currentUser.getMembership(directConversation.channel.id)
+
+    expect(updatedLastReadMessageTimetoken.lastReadMessageTimetoken).not.toEqual(
+      initialLastReadMessageTimetoken.lastReadMessageTimetoken
+    )
+  })
 })

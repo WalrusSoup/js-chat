@@ -51,6 +51,8 @@ export class Channel {
   private typingIndicators: Map<string, ReturnType<typeof setTimeout>> = new Map()
   /** @internal */
   private sendTextRateLimiter: ExponentialRateLimiter
+  /** @internal */
+  private updateTimestampOnSend = false
 
   /** @internal */
   constructor(chat: Chat, params: ChannelFields) {
@@ -61,6 +63,7 @@ export class Channel {
       params.type ? chat.config.rateLimitPerChannel[params.type] || 0 : 0,
       chat.config.rateLimitFactor
     )
+    this.updateTimestampOnSend = this.chat.config.updateTimestampOnSend
     Object.assign(this, params)
   }
 
@@ -235,6 +238,14 @@ export class Channel {
           const userId = mentionedUsers[Number(key)].id
 
           this.emitUserMention({ userId, timetoken: publishResponse.timetoken, text })
+        })
+      }
+
+      if (this.updateTimestampOnSend) {
+        this.chat.currentUser.getMembership(this.id).then((membership) => {
+          if (!membership) return
+
+          membership.setLastReadMessageTimetoken(String(publishResponse.timetoken))
         })
       }
 

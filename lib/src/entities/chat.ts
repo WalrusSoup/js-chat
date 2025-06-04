@@ -54,6 +54,7 @@ export type ChatConfig = {
     reactionsActionName?: string
   }
   authKey?: string
+  updateTimestampOnSend: boolean
 }
 
 type ChatConstructor = Partial<ChatConfig> & PubNub.PubnubConfig
@@ -150,6 +151,7 @@ export class Chat {
         getMessageResponseBody: customPayloads?.getMessageResponseBody,
       },
       authKey: pubnubConfig.authKey,
+      updateTimestampOnSend: params.updateTimestampOnSend ?? false,
     } as ChatConfig
 
     this.accessManager = new AccessManager(this)

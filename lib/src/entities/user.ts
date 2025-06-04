@@ -258,6 +258,20 @@ export class User {
       })),
     }
   }
+
+  /**
+   * Get the membership for the user in a specific channel.
+   * @see {@link https://www.pubnub.com/docs/general/metadata/filtering#filter-expression-components }
+   * @param channel_id the channel ID to get the membership for
+   * @returns the membership for the user in the specified channel, or null if not found
+   */
+  async getMembership(channel_id: string) {
+    const response = await this.getMemberships({
+      filter: `channel.id == '${channel_id}'`,
+      limit: 1,
+    })
+    return response.memberships[0] || null
+  }
   /*
    * Other
    */
