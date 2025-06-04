@@ -1317,10 +1317,87 @@ describe("Channel test", () => {
     await sleep(500)
 
     const updatedLastReadMessageTimetoken =
-      await chatInstanceWithReadConfig.currentUser.getMembership(directConversation.channel.id)
+      await chatInstanceWithReadConfig.currentUser.getMembership(
+        directConversation.channel.id,
+        false
+      )
 
     expect(updatedLastReadMessageTimetoken.lastReadMessageTimetoken).not.toEqual(
       initialLastReadMessageTimetoken.lastReadMessageTimetoken
     )
+  })
+
+  test("it should cache memberships automatically", async () => {
+    const user1 = await createRandomUser()
+    const user2 = await createRandomUser()
+    const chatInstanceWithReadConfig = await createChatInstance({
+      userId: user1.id,
+      shouldCreateNewInstance: true,
+      config: {
+        userId: user1.id,
+        publishKey: process.env.PUBLISH_KEY ?? "",
+        subscribeKey: process.env.SUBSCRIBE_KEY ?? "",
+        updateTimestampOnSend: true,
+      },
+    })
+
+    const directConversation = await chatInstanceWithReadConfig.createDirectConversation({
+      user: user2,
+      channelData: { name: "Test Convo" },
+    })
+
+    await directConversation.channel.join(() => null)
+    const initialLastReadMessageTimetoken =
+      await chatInstanceWithReadConfig.currentUser.getMembership(directConversation.channel.id)
+
+    const messageText = "Hello from User1 in read config chat"
+    await directConversation.channel.sendText(messageText)
+    await sleep(500)
+
+    // this should NOT change if it was cached
+    const cachedLastReadMessageTimetoken =
+      await chatInstanceWithReadConfig.currentUser.getMembership(directConversation.channel.id)
+
+    expect(cachedLastReadMessageTimetoken.lastReadMessageTimetoken).toEqual(
+      initialLastReadMessageTimetoken.lastReadMessageTimetoken
+    )
+  })
+
+  test("it should cache all memberships automatically", async () => {
+    const user1 = await createRandomUser()
+    const user2 = await createRandomUser()
+    const chatInstanceWithReadConfig = await createChatInstance({
+      userId: user1.id,
+      shouldCreateNewInstance: true,
+      config: {
+        userId: user1.id,
+        publishKey: process.env.PUBLISH_KEY ?? "",
+        subscribeKey: process.env.SUBSCRIBE_KEY ?? "",
+        updateTimestampOnSend: true,
+      },
+    })
+
+    const directConversation = await chatInstanceWithReadConfig.createDirectConversation({
+      user: user2,
+      channelData: { name: "Uwu Cache Convo 1" },
+    })
+
+    sleep(500)
+    const memberships = await chatInstanceWithReadConfig.currentUser.getAllMemberships()
+    expect(memberships.total).toBe(1)
+    sleep(500)
+    // add the user to another channel, and then get memberships again
+    const directConversation2 = await chatInstanceWithReadConfig.createDirectConversation({
+      user: user2,
+      channelData: { name: "Uwu Cache Convo 2" },
+      channelId: "uwu-cache-convo-" + Date.now(),
+    })
+
+    const memberships2 = await chatInstanceWithReadConfig.currentUser.getAllMemberships({}, false)
+    expect(memberships2.total).toBe(1)
+    sleep(500)
+    // now call it again, but bust the cache
+    const memberships3 = await chatInstanceWithReadConfig.currentUser.getAllMemberships()
+    expect(memberships3.total).toBe(2)
   })
 })

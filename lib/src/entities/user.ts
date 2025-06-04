@@ -27,6 +27,8 @@ export class User {
   readonly type?: string
   readonly updated?: string
   readonly lastActiveTimestamp?: number
+  /** @internal */
+  private cachedMemberships: Map<string, Membership> = new Map()
 
   /** @internal */
   constructor(chat: Chat, params: UserFields) {
@@ -164,7 +166,8 @@ export class User {
   }
 
   async getAllMemberships(
-    params: Omit<GetMembershipsParametersv2, "include" | "uuid"> = {}
+    params: Omit<GetMembershipsParametersv2, "include" | "uuid"> = {},
+    bustCache = true
   ): Promise<{
     total: number
     memberships: Membership[]
@@ -174,6 +177,13 @@ export class User {
     let hasNext = true
     let previousPage = null
     let total = 0
+
+    if (!bustCache && this.cachedMemberships.size > 0) {
+      return {
+        total: this.cachedMemberships.size,
+        memberships: Array.from(this.cachedMemberships.values()),
+      }
+    }
 
     while (hasNext) {
       const response = (await this.getMemberships({ ...params, page })) as MembershipResponse
@@ -190,6 +200,10 @@ export class User {
       }
       previousPage = response.page.next
     }
+
+    allMemberships.forEach((membership) => {
+      this.cachedMemberships.set(membership.channel.id, membership)
+    })
 
     return {
       total,
@@ -263,14 +277,30 @@ export class User {
    * Get the membership for the user in a specific channel.
    * @see {@link https://www.pubnub.com/docs/general/metadata/filtering#filter-expression-components }
    * @param channel_id the channel ID to get the membership for
+   * @param useCache whether to use the cached memberships or fetch from the server
    * @returns the membership for the user in the specified channel, or null if not found
    */
-  async getMembership(channel_id: string) {
+  async getMembership(channel_id: string, useCache = true) {
+    if (useCache && this.cachedMemberships) {
+      const cachedMembership = this.cachedMemberships.get(channel_id)
+      if (cachedMembership) return cachedMembership
+    }
     const response = await this.getMemberships({
       filter: `channel.id == '${channel_id}'`,
       limit: 1,
     })
+    if (useCache && response.memberships.length > 0) {
+      this.cachedMemberships.set(channel_id, response.memberships[0])
+    }
     return response.memberships[0] || null
+  }
+
+  clearCachedMemberships(): void {
+    this.cachedMemberships.clear()
+  }
+
+  getCachedMemberships(): Map<string, Membership> {
+    return this.cachedMemberships
   }
   /*
    * Other
