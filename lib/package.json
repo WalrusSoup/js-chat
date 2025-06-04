@@ -1,6 +1,6 @@
 {
   "name": "@walrussoup/pubnub-chat",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "description": "PubNub JavaScript Chat SDK",
   "author": "PubNub <support@pubnub.com>",
   "license": "SEE LICENSE IN LICENSE",
