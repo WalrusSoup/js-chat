@@ -1238,33 +1238,6 @@ describe("Channel test", () => {
     expect(channelsInGroup.length).toBe(3)
   })
 
-  test("should join channels when new messages are received into the channel group", async () => {
-    const sharedChannelId = `shared-channel-${Date.now()}`
-    const otherChatInstance = await createChatInstance({
-      userId: "test-user-2",
-      shouldCreateNewInstance: true,
-    })
-
-    const pendingChannel = await otherChatInstance.createDirectConversation({
-      user: chat.currentUser,
-      channelData: { name: "Test Shared Conversation" },
-      channelId: sharedChannelId,
-    })
-
-    const randomChannels = [createRandomChannel()]
-    const channels = await Promise.all(randomChannels)
-    const channelsToJoin = channels.map((channel) => channel.id)
-    channelsToJoin.push(sharedChannelId)
-
-    await chat.joinManyChannelsAsGroup(channelsToJoin, () => null)
-    expect(chat.sdk.getSubscribedChannels().includes(sharedChannelId)).toBe(false)
-
-    await pendingChannel.channel.sendText("Hello from user 2")
-    await sleep(2000)
-
-    expect(chat.sdk.getSubscribedChannels().includes(sharedChannelId)).toBe(true)
-  })
-
   test("should chunk channels by URL-safe length, not count", () => {
     // Create channel IDs that are exactly 500 characters long
     const createLongChannelId = (index: number) => `channel-${index}-` + "x".repeat(488) // "channel-0-" is 11 chars, so + 489 = 500

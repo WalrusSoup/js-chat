@@ -695,7 +695,7 @@ export class Chat {
   async joinManyChannelsAsGroup(
     ids: string[],
     callback: (message: Message) => void,
-    callbackOnJoin?: (event: any) => void
+    callbackOnGroupMessage?: (event: any) => void
   ) {
     if (!ids || !ids.length) throw "IDs are required"
     const userId = this.user.id
@@ -736,12 +736,8 @@ export class Chat {
           return
         }
         await pendingChannel.join(callback)
-        this.sdk.channelGroups.removeChannels({
-          channels: [realChannel],
-          channelGroup: subscribedChannel,
-        })
-        if (callbackOnJoin) {
-          callbackOnJoin(msgEvent)
+        if (callbackOnGroupMessage) {
+          callbackOnGroupMessage(msgEvent)
         }
         callback(Message.fromDTO(this, msgEvent))
       },
