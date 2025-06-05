@@ -389,23 +389,42 @@ export class Channel {
     params: { startTimetoken?: string; endTimetoken?: string; count?: number } = {}
   ) {
     try {
-      const options = {
-        channels: [this.id],
-        count: params.count || 25,
-        start: params.startTimetoken,
-        end: params.endTimetoken,
-        includeMessageActions: true,
-        includeMeta: true,
-      }
+      const requestedCount = params.count || 25
+      let allMessages: Message[] = []
+      const start = params.startTimetoken
+      const end = params.endTimetoken
+      let remaining = requestedCount
+      let isMore = true
+      let lastFetchedTimetoken: string | undefined = end
 
-      const response = await this.chat.sdk.fetchMessages(options)
-
-      return {
-        messages:
+      while (remaining > 0 && isMore) {
+        const fetchCount = Math.min(25, remaining)
+        const options = {
+          channels: [this.id],
+          count: fetchCount,
+          start,
+          end: lastFetchedTimetoken,
+          includeMessageActions: true,
+          includeMeta: true,
+        }
+        const response = await this.chat.sdk.fetchMessages(options)
+        const messages =
           response.channels[this.id]?.map((messageObject) =>
             Message.fromDTO(this.chat, messageObject)
-          ) || [],
-        isMore: response.channels[this.id]?.length === (params.count || 25),
+          ) || []
+        allMessages = allMessages.concat(messages)
+        remaining -= messages.length
+        isMore = messages.length === fetchCount && messages.length > 0
+        // Update the end timetoken for the next fetch to the last message's timetoken (exclusive)
+        if (messages.length > 0) {
+          lastFetchedTimetoken = messages[messages.length - 1].timetoken
+        } else {
+          break
+        }
+      }
+      return {
+        messages: allMessages,
+        isMore: allMessages.length === requestedCount,
       }
     } catch (error) {
       throw error
