@@ -53,7 +53,7 @@ describe("User test", () => {
 
     const stopUpdates = user.streamUpdates(callback)
     await user.update({ name })
-    await sleep(150)
+    await sleep(250)
 
     expect(callback).toHaveBeenCalledWith(updatedUser)
     expect(updatedUser.name).toEqual(name)

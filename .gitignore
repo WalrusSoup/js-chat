@@ -11,3 +11,5 @@ yarn-error.log
 package-lock.json
 samples/astro
 .yarn/install-state.gz
+.yarn/releases/*
+.yarnrc.yml
