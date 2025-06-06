@@ -519,6 +519,38 @@ export class Channel {
     }
   }
 
+  async getAllMembers(params: Omit<GetChannelMembersParameters, "channel" | "include"> = {}) {
+    let allMembers: Membership[] = []
+    let page: any = undefined
+    let hasNext = true
+    let previousPage = null
+    let total = 0
+    let status: any = undefined
+
+    while (hasNext) {
+      const response = await this.getMembers({ ...params, page })
+      allMembers = allMembers.concat(response.members)
+      total = response.total ?? 0
+      status = response.status
+      if (response.page.next) {
+        page = { next: response.page.next }
+      } else {
+        hasNext = false
+      }
+      if (previousPage === response.page.next) {
+        hasNext = false
+        break
+      }
+      previousPage = response.page.next
+    }
+
+    return {
+      total,
+      status,
+      members: allMembers,
+    }
+  }
+
   async invite(user: User) {
     if (this.type === "public") throw "Channel invites are not supported in Public chats."
     try {
