@@ -656,7 +656,9 @@ export class Chat {
     channels: string[],
     groupNamePrefix: string
   ): { chunks: string[][]; channelNameToGroupMap: Map<string, number> } {
-    const maxUrlLength = 1800
+    const currentTokenLength = encodeURIComponent(this.sdk.getToken() ?? "").length
+    const headroomLength = 150 // 150 chars headroom for user agent, request id, version, uuid
+    const maxUrlLength = 1800 - currentTokenLength - headroomLength
     const baseLength = groupNamePrefix.length + 20
     const chunks: string[][] = []
     const channelNameToGroupMap = new Map<string, number>()
@@ -665,7 +667,8 @@ export class Chat {
     let currentLength = baseLength
 
     for (const channel of channels) {
-      const extraLength = channel.length + (currentChunk.length > 0 ? 1 : 0)
+      const encodedChannel = encodeURIComponent(channel)
+      const extraLength = encodedChannel.length + (currentChunk.length > 0 ? 3 : 0)
 
       if (currentLength + extraLength <= maxUrlLength) {
         currentChunk.push(channel)
@@ -676,7 +679,7 @@ export class Chat {
         currentChunk.forEach((id) => channelNameToGroupMap.set(id, groupIndex))
 
         currentChunk = [channel]
-        currentLength = baseLength + channel.length
+        currentLength = baseLength + encodedChannel.length
       }
     }
 
