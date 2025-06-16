@@ -656,10 +656,10 @@ export class Chat {
     channels: string[],
     groupNamePrefix: string
   ): { chunks: string[][]; channelNameToGroupMap: Map<string, number> } {
-    const currentTokenLength = encodeURIComponent(this.sdk.getToken() ?? "").length
-    const headroomLength = 150 // 150 chars headroom for user agent, request id, version, uuid
-    const maxUrlLength = 1800 - currentTokenLength - headroomLength
-    const baseLength = groupNamePrefix.length + 20
+    const currentTokenLength = encodeURIComponent(this.sdk.getToken() ?? "x".repeat(1000)).length
+    const headroomLength = 300 // For suffix and prefix on the URL itself
+    const baseLength = groupNamePrefix.length + headroomLength + currentTokenLength
+    const maxUrlLength = 1800
     const chunks: string[][] = []
     const channelNameToGroupMap = new Map<string, number>()
 

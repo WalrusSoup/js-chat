@@ -1240,9 +1240,9 @@ describe("Channel test", () => {
 
   test("should chunk channels by URL-safe length, not count", () => {
     // Create channel IDs that are exactly 500 characters long
-    const createLongChannelId = (index: number) => `channel-${index}-` + "x".repeat(488) // "channel-0-" is 11 chars, so + 489 = 500
+    const createLongChannelId = (index: number) => `channel-${index}-` + "x".repeat(10) // "channel-0-" is 11 chars, so + 489 = 500
 
-    const channels = Array.from({ length: 5 }, (_, i) => createLongChannelId(i)) // 5 very long channels
+    const channels = Array.from({ length: 200 }, (_, i) => createLongChannelId(i)) // 5 very long channels
     const groupPrefix = "test-cg-"
 
     // Set max URL length artificially low to force chunking
